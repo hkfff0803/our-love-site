@@ -83,7 +83,7 @@
     <div class="modal-content compose-content">
       <button class="modal-close" id="compose-close">&times;</button>
       <div class="compose-body">
-        <h2 class="compose-title">记录这一刻</h2>
+        <h2 class="compose-title" id="compose-heading">记录这一刻</h2>
 
         <label class="field-label" for="compose-title">标题</label>
         <input type="text" id="compose-title" class="compose-field" maxlength="60" placeholder="给这段记忆起个名字">
@@ -103,9 +103,11 @@
           <option value="wuhan">武汉</option>
         </select>
 
-        <label class="field-label" for="compose-images">图片（可多选）</label>
-        <input type="file" id="compose-images" class="compose-file" accept="image/*" multiple>
-        <div class="compose-previews" id="compose-previews"></div>
+        <div id="compose-images-area">
+          <label class="field-label" for="compose-images">图片（可多选）</label>
+          <input type="file" id="compose-images" class="compose-file" accept="image/*" multiple>
+          <div class="compose-previews" id="compose-previews"></div>
+        </div>
 
         <button class="compose-submit" id="compose-submit">发布</button>
       </div>

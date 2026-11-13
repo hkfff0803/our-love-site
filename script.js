@@ -1,20 +1,3 @@
-const POSTS = [
-  {
-    id: 1,
-    title: "London day",
-    excerpt: "第一个伦敦日",
-    fullText: "第一个伦敦日，想到这一天，我脑海里总蹦出来那句很俗套的\"爱是长久凝望着你注视我的眼睛。\"\n\n我知道当我在拍伦敦眼、天空、古老的埃及木乃伊，你都在望着我的侧脸，当我转头看你，你又避开眼神。那真是很美的一天。",
-    images: [
-      "images/London day (1).jpg",
-      "images/London day (2).jpg",
-      "images/London day (3).jpg",
-      "images/London day (4).jpg"
-    ],
-    category: "uk",
-    date: "2026.08.05"
-  }
-];
-
 const CATEGORY_MAP = {
   uk: "英国",
   wuhan: "武汉",
@@ -25,6 +8,7 @@ const CATEGORY_MAP = {
 };
 
 let dbPosts = [];
+let openEditPost = null;
 
 function formatDate(date) {
   const pad = n => String(n).padStart(2, "0");
@@ -39,11 +23,13 @@ function makeExcerpt(text) {
 function toPost(row) {
   return {
     key: `db-${row.id}`,
+    id: row.id,
     title: row.title,
     excerpt: row.excerpt || makeExcerpt(row.content),
     fullText: row.content,
     images: row.images || [],
     category: row.category,
+    client_id: row.client_id,
     date: row.event_date
       ? row.event_date.replace(/-/g, ".")
       : formatDate(new Date(row.created_at))
@@ -51,8 +37,7 @@ function toPost(row) {
 }
 
 function getAllPosts() {
-  const staticPosts = POSTS.map(p => ({ ...p, key: `static-${p.id}` }));
-  return dbPosts.map(toPost).concat(staticPosts);
+  return dbPosts.map(toPost);
 }
 
 let currentCategory = "all";
@@ -75,6 +60,11 @@ function renderPosts() {
     ? allPosts
     : allPosts.filter(p => p.category === currentCategory);
 
+  if (!filtered.length) {
+    gallery.innerHTML = `<div class="empty-state">还没有记录，点「+ 记录」写下第一段吧</div>`;
+    return;
+  }
+
   gallery.innerHTML = filtered.map(post => {
     const firstImg = post.images[0];
     const multi = post.images.length > 1;
@@ -92,6 +82,11 @@ function renderPosts() {
         <h3 class="card-title">${escapeHtml(post.title)}</h3>
         <p class="card-excerpt">${escapeHtml(post.excerpt)}</p>
         <span class="card-date">${post.date}</span>
+        ${post.client_id === CLIENT_ID ? `
+        <div class="card-actions">
+          <button class="card-action" data-action="edit" data-key="${post.key}">编辑</button>
+          <button class="card-action" data-action="delete" data-key="${post.key}">删除</button>
+        </div>` : ""}
       </div>
     </article>
   `;
@@ -100,6 +95,35 @@ function renderPosts() {
   gallery.querySelectorAll(".card").forEach(card => {
     card.addEventListener("click", () => openModal(card.dataset.key));
   });
+
+  gallery.querySelectorAll(".card-action").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const id = Number(btn.dataset.key.replace("db-", ""));
+      if (btn.dataset.action === "edit") {
+        const row = dbPosts.find(p => p.id === id);
+        if (row && openEditPost) openEditPost(row);
+      } else if (btn.dataset.action === "delete") {
+        deletePost(id);
+      }
+    });
+  });
+}
+
+async function deletePost(id) {
+  if (!confirm("删除这条记录？")) return;
+  const { data, error } = await supabaseClient
+    .from("posts")
+    .delete()
+    .eq("id", id)
+    .select("id");
+  if (error || !data || !data.length) {
+    console.error("删除记录失败:", error);
+    alert("删除失败：" + (error ? error.message : "没有删除权限"));
+    return;
+  }
+  dbPosts = dbPosts.filter(p => p.id !== id);
+  renderPosts();
 }
 
 function openModal(key) {
@@ -420,6 +444,15 @@ function subscribePosts() {
     )
     .on(
       "postgres_changes",
+      { event: "UPDATE", schema: "public", table: "posts" },
+      (payload) => {
+        const idx = dbPosts.findIndex(p => p.id === payload.new.id);
+        if (idx !== -1) dbPosts[idx] = payload.new;
+        renderPosts();
+      }
+    )
+    .on(
+      "postgres_changes",
       { event: "DELETE", schema: "public", table: "posts" },
       (payload) => {
         dbPosts = dbPosts.filter(p => p.id !== payload.old.id);
@@ -446,6 +479,8 @@ function setupCompose() {
   const modal = document.getElementById("compose-modal");
   const openBtn = document.getElementById("compose-open");
   const closeBtn = document.getElementById("compose-close");
+  const heading = document.getElementById("compose-heading");
+  const imagesArea = document.getElementById("compose-images-area");
   const titleInput = document.getElementById("compose-title");
   const excerptInput = document.getElementById("compose-excerpt");
   const dateInput = document.getElementById("compose-date");
@@ -455,8 +490,10 @@ function setupCompose() {
   const previews = document.getElementById("compose-previews");
   const submitBtn = document.getElementById("compose-submit");
   let selectedFiles = [];
+  let editingId = null;
 
   function reset() {
+    editingId = null;
     titleInput.value = "";
     excerptInput.value = "";
     dateInput.value = "";
@@ -465,6 +502,9 @@ function setupCompose() {
     fileInput.value = "";
     selectedFiles = [];
     previews.innerHTML = "";
+    heading.textContent = "记录这一刻";
+    imagesArea.hidden = false;
+    submitBtn.textContent = "发布";
   }
 
   function close() {
@@ -473,10 +513,25 @@ function setupCompose() {
     reset();
   }
 
-  openBtn.addEventListener("click", () => {
+  function open(post) {
+    editingId = post ? post.id : null;
+    heading.textContent = post ? "编辑记录" : "记录这一刻";
+    imagesArea.hidden = !!post;
+    submitBtn.textContent = post ? "保存修改" : "发布";
+    if (post) {
+      titleInput.value = post.title || "";
+      excerptInput.value = post.excerpt || "";
+      dateInput.value = post.event_date || "";
+      textInput.value = post.content || "";
+      categorySelect.value = post.category || "uk";
+    }
     modal.classList.add("show");
     document.body.style.overflow = "hidden";
-  });
+  }
+
+  openEditPost = open;
+
+  openBtn.addEventListener("click", () => open(null));
 
   closeBtn.addEventListener("click", close);
   modal.addEventListener("click", (e) => {
@@ -507,32 +562,50 @@ function setupCompose() {
     }
 
     submitBtn.disabled = true;
-    submitBtn.textContent = "发布中...";
+    submitBtn.textContent = editingId ? "保存中..." : "发布中...";
     try {
-      const images = await uploadImages(selectedFiles);
-      const { data, error } = await supabaseClient
-        .from("posts")
-        .insert({
-          title,
-          content,
-          excerpt: excerpt || null,
-          event_date: eventDate || null,
-          category,
-          images,
-          client_id: CLIENT_ID
-        })
-        .select("id, title, content, excerpt, event_date, category, images, client_id, created_at")
-        .single();
-      if (error) throw error;
-      if (!dbPosts.some(p => p.id === data.id)) dbPosts.unshift(data);
+      if (editingId) {
+        const { data, error } = await supabaseClient
+          .from("posts")
+          .update({
+            title,
+            content,
+            excerpt: excerpt || null,
+            event_date: eventDate || null,
+            category
+          })
+          .eq("id", editingId)
+          .select("id, title, content, excerpt, event_date, category, images, client_id, created_at")
+          .single();
+        if (error) throw error;
+        const idx = dbPosts.findIndex(p => p.id === data.id);
+        if (idx !== -1) dbPosts[idx] = data;
+      } else {
+        const images = await uploadImages(selectedFiles);
+        const { data, error } = await supabaseClient
+          .from("posts")
+          .insert({
+            title,
+            content,
+            excerpt: excerpt || null,
+            event_date: eventDate || null,
+            category,
+            images,
+            client_id: CLIENT_ID
+          })
+          .select("id, title, content, excerpt, event_date, category, images, client_id, created_at")
+          .single();
+        if (error) throw error;
+        if (!dbPosts.some(p => p.id === data.id)) dbPosts.unshift(data);
+      }
       renderPosts();
       close();
     } catch (err) {
-      console.error("发布失败:", err);
-      alert("发布失败：" + (err.message || "请稍后再试"));
+      console.error("保存失败:", err);
+      alert("保存失败：" + (err.message || "请稍后再试"));
     } finally {
       submitBtn.disabled = false;
-      submitBtn.textContent = "发布";
+      submitBtn.textContent = editingId ? "保存修改" : "发布";
     }
   });
 }
