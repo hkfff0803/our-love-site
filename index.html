@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Max &amp; Moew moew</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <h1 class="site-title">
+      <span class="title-emoji">🦊</span>
+      <span>Max &amp; Moew moew</span>
+      <span class="title-emoji">🐱</span>
+    </h1>
+    <nav class="topbar">
+      <div class="topbar-inner">
+        <button class="main-tab active" data-view="gallery">图文记录</button>
+        <button class="main-tab" data-view="messages">留言板</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="view" id="view-gallery">
+      <div class="gallery-toolbar">
+        <nav class="sub-nav" id="category-tabs">
+          <button class="nav-tab active" data-category="all">全部</button>
+          <button class="nav-tab" data-category="uk">英国</button>
+          <button class="nav-tab" data-category="wuhan">武汉</button>
+        </nav>
+        <button class="compose-btn" id="compose-open">+ 记录</button>
+      </div>
+      <section class="gallery" id="gallery">
+      </section>
+    </section>
+
+    <section class="view" id="view-messages" hidden>
+      <section class="message-section" id="message-section">
+        <h2 class="message-title">留言板</h2>
+        <div class="message-input-area">
+          <input
+            type="text"
+            id="message-input"
+            class="message-input"
+            placeholder="写下你想说的话..."
+            maxlength="200"
+          >
+          <button class="send-btn" id="send-btn">发送</button>
+        </div>
+        <ul class="message-list" id="message-list">
+        </ul>
+      </section>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>made for Max & Moew Moew</p>
+  </footer>
+
+  <div class="modal-overlay" id="modal">
+    <div class="modal-content">
+      <button class="modal-close" id="modal-close">&times;</button>
+      <div class="modal-carousel" id="modal-carousel">
+        <div class="modal-track" id="modal-track"></div>
+        <button class="modal-arrow modal-prev" id="modal-prev">&#10094;</button>
+        <button class="modal-arrow modal-next" id="modal-next">&#10095;</button>
+        <div class="modal-dots" id="modal-dots"></div>
+      </div>
+      <div class="modal-body">
+        <span class="modal-tag" id="modal-tag"></span>
+        <h2 class="modal-title" id="modal-title"></h2>
+        <p class="modal-text" id="modal-text"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="compose-modal">
+    <div class="modal-content compose-content">
+      <button class="modal-close" id="compose-close">&times;</button>
+      <div class="compose-body">
+        <h2 class="compose-title">记录这一刻</h2>
+
+        <label class="field-label" for="compose-title">标题</label>
+        <input type="text" id="compose-title" class="compose-field" maxlength="60" placeholder="给这段记忆起个名字">
+
+        <label class="field-label" for="compose-excerpt">缩略语（选填）</label>
+        <input type="text" id="compose-excerpt" class="compose-field" maxlength="40" placeholder="用一句话概括这段记忆">
+
+        <label class="field-label" for="compose-date">日期（选填）</label>
+        <input type="date" id="compose-date" class="compose-field">
+
+        <label class="field-label" for="compose-text">文字</label>
+        <textarea id="compose-text" class="compose-field compose-textarea" rows="6" maxlength="2000" placeholder="写下这一刻..."></textarea>
+
+        <label class="field-label" for="compose-category">分类</label>
+        <select id="compose-category" class="compose-field compose-select">
+          <option value="uk">英国</option>
+          <option value="wuhan">武汉</option>
+        </select>
+
+        <label class="field-label" for="compose-images">图片（可多选）</label>
+        <input type="file" id="compose-images" class="compose-file" accept="image/*" multiple>
+        <div class="compose-previews" id="compose-previews"></div>
+
+        <button class="compose-submit" id="compose-submit">发布</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="script.js"></script>
+</body>
+</html>
