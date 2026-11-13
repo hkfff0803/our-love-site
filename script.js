@@ -462,12 +462,42 @@ function subscribePosts() {
     .subscribe();
 }
 
+async function compressImage(file, maxSide = 1600, quality = 0.8) {
+  if (!file.type.startsWith("image/") || file.type === "image/gif") return file;
+  try {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+    if (scale >= 1 && file.size <= 800 * 1024) {
+      bitmap.close?.();
+      return file;
+    }
+    const width = Math.round(bitmap.width * scale);
+    const height = Math.round(bitmap.height * scale);
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, width, height);
+    ctx.drawImage(bitmap, 0, 0, width, height);
+    bitmap.close?.();
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", quality));
+    if (!blob) return file;
+    const name = file.name.replace(/\.(heic|heif|png|webp|jpg|jpeg)$/i, "") + ".jpg";
+    return new File([blob], name, { type: "image/jpeg" });
+  } catch (err) {
+    console.warn("图片压缩失败，改用原图:", err);
+    return file;
+  }
+}
+
 async function uploadImages(files) {
   const urls = [];
   for (const file of files) {
-    const ext = file.name.includes(".") ? file.name.split(".").pop().toLowerCase() : "jpg";
+    const upload = await compressImage(file);
+    const ext = upload.name.includes(".") ? upload.name.split(".").pop().toLowerCase() : "jpg";
     const path = `${CLIENT_ID}/${crypto.randomUUID()}.${ext}`;
-    const { error } = await supabaseClient.storage.from("post-images").upload(path, file);
+    const { error } = await supabaseClient.storage.from("post-images").upload(path, upload);
     if (error) throw error;
     const { data } = supabaseClient.storage.from("post-images").getPublicUrl(path);
     urls.push(data.publicUrl);
