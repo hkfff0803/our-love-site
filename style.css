@@ -410,27 +410,33 @@ body::after {
 
 .message-input-area {
   display: flex;
+  align-items: flex-end;
   gap: 10px;
   margin-bottom: 26px;
 }
 
 .message-input {
   flex: 1;
-  padding: 13px 18px;
+  min-height: 48px;
+  max-height: 150px;
+  padding: 11px 18px;
   border: 1px dashed rgba(0, 0, 0, 0.12);
   border-radius: 12px;
   background-color: #fffdf8;
   background-image: repeating-linear-gradient(
     to bottom,
     transparent 0px,
-    transparent 11px,
-    rgba(0, 0, 0, 0.045) 11px,
-    rgba(0, 0, 0, 0.045) 12px
+    transparent 21px,
+    rgba(0, 0, 0, 0.045) 21px,
+    rgba(0, 0, 0, 0.045) 22px
   );
   font-size: 14px;
+  line-height: 22px;
   font-family: inherit;
   color: var(--text);
   outline: none;
+  resize: none;
+  overflow-y: auto;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -524,8 +530,27 @@ body::after {
   font-size: 14px;
   color: var(--text);
   line-height: 1.7;
-  word-break: break-all;
+  word-break: break-word;
+  white-space: pre-wrap;
   padding-right: 22px;
+}
+
+.message-text.is-clamped {
+  display: -webkit-box;
+  -webkit-line-clamp: 8;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.message-toggle {
+  margin-top: 6px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--accent-deep);
+  cursor: pointer;
 }
 
 .message-time {

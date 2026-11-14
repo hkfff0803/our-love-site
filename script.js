@@ -293,6 +293,7 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, 
 });
 
 let messages = [];
+const expandedMessageIds = new Set();
 
 function getClientId() {
   let id = localStorage.getItem("message-client-id");
@@ -310,13 +311,19 @@ function formatTime(date) {
 
 function renderMessages() {
   const list = document.getElementById("message-list");
-  list.innerHTML = messages.map(msg => `
+  list.innerHTML = messages.map(msg => {
+    const long = msg.text.length > 180;
+    const expanded = expandedMessageIds.has(msg.id);
+    const clamped = long && !expanded;
+    return `
     <li class="message-item">
       ${msg.client_id === CLIENT_ID ? `<button class="message-delete" data-id="${msg.id}" title="删除">&times;</button>` : ""}
-      <p class="message-text">${escapeHtml(msg.text)}</p>
+      <p class="message-text${clamped ? " is-clamped" : ""}">${escapeHtml(msg.text)}</p>
+      ${long ? `<button class="message-toggle" type="button" data-id="${msg.id}">${expanded ? "收起" : "展开"}</button>` : ""}
       <span class="message-time">${formatTime(new Date(msg.created_at))}</span>
     </li>
-  `).join("");
+  `;
+  }).join("");
 }
 
 function addMessage(msg) {
@@ -368,6 +375,11 @@ function setupMessageInput() {
   const btn = document.getElementById("send-btn");
   const list = document.getElementById("message-list");
 
+  function autoGrow() {
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, 150) + "px";
+  }
+
   async function send() {
     const text = input.value.trim();
     if (!text) return;
@@ -384,15 +396,32 @@ function setupMessageInput() {
       return;
     }
     input.value = "";
+    autoGrow();
     addMessage(data);
   }
 
+  input.addEventListener("input", autoGrow);
   btn.addEventListener("click", send);
   input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") send();
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      send();
+    }
   });
 
   list.addEventListener("click", async (e) => {
+    const toggleBtn = e.target.closest(".message-toggle");
+    if (toggleBtn) {
+      const id = Number(toggleBtn.dataset.id);
+      if (expandedMessageIds.has(id)) {
+        expandedMessageIds.delete(id);
+      } else {
+        expandedMessageIds.add(id);
+      }
+      renderMessages();
+      return;
+    }
+
     const delBtn = e.target.closest(".message-delete");
     if (!delBtn) return;
     if (!confirm("删除这条留言？")) return;
@@ -413,6 +442,7 @@ function setupMessageInput() {
     }
 
     messages = messages.filter(m => m.id !== id);
+    expandedMessageIds.delete(id);
     renderMessages();
   });
 }
