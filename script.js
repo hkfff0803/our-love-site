@@ -37,7 +37,16 @@ function toPost(row) {
 }
 
 function getAllPosts() {
-  return dbPosts.map(toPost);
+  const rows = dbPosts.slice().sort((a, b) => {
+    if (a.event_date && b.event_date) {
+      if (a.event_date !== b.event_date) return a.event_date < b.event_date ? -1 : 1;
+      return (a.created_at || "").localeCompare(b.created_at || "");
+    }
+    if (a.event_date) return -1;
+    if (b.event_date) return 1;
+    return (a.created_at || "").localeCompare(b.created_at || "");
+  });
+  return rows.map(toPost);
 }
 
 let currentCategory = "all";
@@ -451,7 +460,8 @@ async function loadPosts() {
   const { data, error } = await supabaseClient
     .from("posts")
     .select("id, title, content, excerpt, event_date, category, images, client_id, created_at")
-    .order("created_at", { ascending: false });
+    .order("event_date", { ascending: true, nullsFirst: false })
+    .order("created_at", { ascending: true });
   if (error) {
     console.error("加载记录失败:", error);
     return;
