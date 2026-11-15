@@ -150,8 +150,14 @@ function openModal(key) {
   carouselEl.style.display = post.images.length ? "" : "none";
 
   track.innerHTML = post.images.map(src =>
-    `<div class="modal-slide"><img src="${src}" alt="${post.title}"></div>`
+    `<div class="modal-slide"><img src="${src}" alt="${post.title}" title="点击查看原图"></div>`
   ).join("");
+
+  track.querySelectorAll("img").forEach(img => {
+    img.addEventListener("click", () => {
+      window.open(img.src, "_blank", "noopener");
+    });
+  });
 
   dots.innerHTML = post.images.length > 1
     ? post.images.map((_, i) => `<button class="modal-dot${i === 0 ? " active" : ""}" data-idx="${i}"></button>`).join("")
