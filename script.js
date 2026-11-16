@@ -87,6 +87,7 @@ function renderPosts() {
         ${multi ? `<span class="card-img-count">${post.images.length}图</span>` : ""}
       </div>
       <div class="card-body">
+        <span class="card-tag">${CATEGORY_MAP[post.category] || ""}</span>
         <h3 class="card-title">${escapeHtml(post.title)}</h3>
         <p class="card-excerpt">${escapeHtml(post.excerpt)}</p>
         <span class="card-date">${post.date}</span>

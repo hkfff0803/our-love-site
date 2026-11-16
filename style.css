@@ -466,6 +466,14 @@ body {
   padding-top: 13px;
 }
 
+.card-tag {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.24em;
+  color: var(--accent);
+}
+
 .card-title {
   margin: 9px 0 7px;
   font-family: var(--serif);
