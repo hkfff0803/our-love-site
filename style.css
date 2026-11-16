@@ -1,5 +1,5 @@
 /* ============================================================
-   Max & Moew moew — 桌面剪贴簿
+   Max & Moew Moew — 桌面剪贴簿
    ============================================================ */
 
 * {
@@ -237,9 +237,17 @@ body {
 
 .topbar {
   margin: 24px auto 0;
-  padding: 12px 0 10px;
+  padding: 12px 18px 10px;
   border-top: 1px dashed var(--rule);
   border-bottom: 1px dashed var(--rule);
+  border-radius: 2px;
+  background-color: rgba(250, 244, 232, 0.55);
+  background-image:
+    repeating-linear-gradient(90deg, rgba(160, 138, 110, 0.07) 0 1px, transparent 1px 22px),
+    linear-gradient(180deg, rgba(255, 253, 248, 0.82), rgba(247, 240, 226, 0.55));
+  box-shadow:
+    inset 1px 0 0 rgba(107, 90, 72, 0.12),
+    inset -1px 0 0 rgba(107, 90, 72, 0.12);
 }
 
 .topbar-inner {
