@@ -241,7 +241,7 @@ body {
   border-top: 1px dashed var(--rule);
   border-bottom: 1px dashed var(--rule);
   border-radius: 2px;
-  background: rgba(250, 244, 232, 0.6);
+  background: #f7f1e5;
 }
 
 .topbar-inner {
