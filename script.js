@@ -95,11 +95,10 @@ function renderPosts() {
         <h3 class="card-title">${escapeHtml(post.title)}</h3>
         <p class="card-excerpt">${escapeHtml(post.excerpt)}</p>
         <span class="card-date">${post.date}</span>
-        ${post.client_id === CLIENT_ID ? `
         <div class="card-actions">
           <button class="card-action" data-action="edit" data-key="${post.key}">编辑</button>
           <button class="card-action" data-action="delete" data-key="${post.key}">删除</button>
-        </div>` : ""}
+        </div>
       </div>
     </article>
   `;
