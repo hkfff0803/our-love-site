@@ -802,6 +802,64 @@ body {
   text-transform: uppercase;
 }
 
+/* ============ 黑胶唱片：歌单入口 ============ */
+.playlist-fab {
+  position: fixed;
+  right: 26px;
+  bottom: 26px;
+  z-index: 60;
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  text-decoration: none;
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.22), transparent 42%),
+    radial-gradient(circle at 50% 50%, #c4704f 0 18%, #3a2b21 18% 24%, #1b1410 24% 100%);
+  box-shadow:
+    0 8px 20px rgba(46, 37, 28, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  animation: vinyl-spin 9s linear infinite;
+  transition: scale 0.35s var(--ease), box-shadow 0.35s ease;
+}
+
+.playlist-fab::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.07) 0 1px,
+    transparent 1px 3px
+  );
+  pointer-events: none;
+}
+
+.playlist-fab-label {
+  position: relative;
+  z-index: 1;
+  font-family: var(--serif);
+  font-size: 15px;
+  color: #fff8ee;
+  opacity: 0.92;
+}
+
+.playlist-fab:hover {
+  scale: 1.07;
+  box-shadow:
+    0 12px 26px rgba(46, 37, 28, 0.34),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  animation-play-state: paused;
+}
+
+@keyframes vinyl-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
 /* ============ 详情弹层：翻开的跨页 ============ */
 .modal-overlay {
   position: fixed;
@@ -1400,6 +1458,17 @@ body {
 
   .compose-content {
     padding: 26px 20px 24px;
+  }
+
+  .playlist-fab {
+    right: 16px;
+    bottom: 18px;
+    width: 50px;
+    height: 50px;
+  }
+
+  .playlist-fab-label {
+    font-size: 13px;
   }
 }
 
