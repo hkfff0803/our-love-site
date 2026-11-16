@@ -536,15 +536,9 @@ body {
   right: 8px;
   display: flex;
   gap: 4px;
-  opacity: 0;
-  translate: 0 -4px;
-  transition: opacity 0.3s ease, translate 0.3s var(--ease);
-  z-index: 4;
-}
-
-.card:hover .card-actions {
   opacity: 1;
   translate: 0 0;
+  z-index: 4;
 }
 
 .card-action {
