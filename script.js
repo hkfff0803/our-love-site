@@ -82,6 +82,13 @@ function renderPosts() {
       : `<div class="card-image-empty">&#9825;</div>`;
     return `
     <article class="card" data-key="${post.key}">
+      <span class="card-tape" aria-hidden="true"></span>
+      <span class="card-corners" aria-hidden="true"></span>
+      <span class="card-clip" aria-hidden="true">
+        <svg viewBox="0 0 22 44" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M4 12v20a7 7 0 0 0 14 0V8a5 5 0 0 0-10 0v22a3 3 0 0 0 6 0V13" />
+        </svg>
+      </span>
       <div class="card-image-wrap">
         ${imageHtml}
         ${multi ? `<span class="card-img-count">${post.images.length}图</span>` : ""}
@@ -100,6 +107,20 @@ function renderPosts() {
     </article>
   `;
   }).join("");
+
+  if (!gallery.dataset.entered) {
+    gallery.dataset.entered = "1";
+    gallery.classList.add("is-entering");
+    setTimeout(() => gallery.classList.remove("is-entering"), 1600);
+  }
+
+  gallery.querySelectorAll(".card-image").forEach(img => {
+    if (img.complete) {
+      img.classList.add("loaded");
+    } else {
+      img.addEventListener("load", () => img.classList.add("loaded"));
+    }
+  });
 
   gallery.querySelectorAll(".card").forEach(card => {
     card.addEventListener("click", () => openModal(card.dataset.key));
@@ -686,6 +707,47 @@ function setupCompose() {
   });
 }
 
+function setupAmbient() {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  const glow = document.getElementById("cursor-glow");
+  if (glow && window.matchMedia("(hover: hover)").matches) {
+    let tx = window.innerWidth / 2;
+    let ty = window.innerHeight / 2;
+    let x = tx;
+    let y = ty;
+
+    window.addEventListener("mousemove", (e) => {
+      tx = e.clientX;
+      ty = e.clientY;
+      glow.style.opacity = "1";
+    }, { passive: true });
+
+    (function loop() {
+      x += (tx - x) * 0.12;
+      y += (ty - y) * 0.12;
+      glow.style.transform = `translate(${x}px, ${y}px)`;
+      requestAnimationFrame(loop);
+    })();
+  }
+
+  const flower = document.querySelector(".deco-flower");
+  const postmark = document.querySelector(".deco-postmark");
+  if (flower && postmark && window.matchMedia("(min-width: 641px)").matches) {
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        flower.style.transform = `translateY(${y * 0.04}px)`;
+        postmark.style.transform = `translateY(${y * -0.04}px)`;
+        ticking = false;
+      });
+    }, { passive: true });
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   renderPosts();
   setupMainNav();
@@ -693,6 +755,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupModal();
   setupMessageInput();
   setupCompose();
+  setupAmbient();
   loadMessages();
   subscribeMessages();
   loadPosts();

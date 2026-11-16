@@ -6,34 +6,104 @@
   <title>Max &amp; Moew moew</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <header class="site-header">
-    <h1 class="site-title">
-      <span class="title-emoji">🦊</span>
-      <span>Max &amp; Moew moew</span>
-      <span class="title-emoji">🐱</span>
-    </h1>
-    <nav class="topbar">
-      <div class="topbar-inner">
-        <button class="main-tab active" data-view="gallery">图文记录</button>
-        <button class="main-tab" data-view="messages">留言板</button>
+  <div class="cursor-glow" id="cursor-glow" aria-hidden="true"></div>
+
+  <div class="paper">
+    <span class="tape tape-left" aria-hidden="true"></span>
+    <span class="tape tape-right" aria-hidden="true"></span>
+    <span class="tape tape-side" aria-hidden="true"></span>
+
+    <div class="deco deco-flower" aria-hidden="true">
+      <svg viewBox="0 0 120 200" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+        <path d="M62 198 C59 154 55 122 53 94" />
+        <path d="M56 150 C38 142 28 126 26 108" />
+        <path d="M57 128 C74 122 84 108 86 92" />
+        <path d="M53 106 C40 100 33 88 32 76" />
+        <ellipse cx="38" cy="72" rx="9" ry="5" transform="rotate(-24 38 72)" />
+        <ellipse cx="48" cy="60" rx="10" ry="5" transform="rotate(12 48 60)" />
+        <ellipse cx="62" cy="54" rx="10" ry="5" transform="rotate(-6 62 54)" />
+        <ellipse cx="74" cy="62" rx="9" ry="5" transform="rotate(28 74 62)" />
+        <ellipse cx="66" cy="72" rx="8" ry="4.5" transform="rotate(-40 66 72)" />
+        <circle cx="56" cy="64" r="4" />
+        <ellipse cx="23" cy="104" rx="7" ry="3.5" transform="rotate(40 23 104)" />
+        <ellipse cx="88" cy="88" rx="7" ry="3.5" transform="rotate(-30 88 88)" />
+        <ellipse cx="31" cy="154" rx="7" ry="3.5" transform="rotate(-58 31 154)" />
+      </svg>
+    </div>
+
+    <div class="deco deco-flower deco-flower-low" aria-hidden="true">
+      <svg viewBox="0 0 120 200" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+        <path d="M62 198 C59 154 55 122 53 94" />
+        <path d="M56 150 C38 142 28 126 26 108" />
+        <path d="M57 128 C74 122 84 108 86 92" />
+        <path d="M53 106 C40 100 33 88 32 76" />
+        <ellipse cx="38" cy="72" rx="9" ry="5" transform="rotate(-24 38 72)" />
+        <ellipse cx="48" cy="60" rx="10" ry="5" transform="rotate(12 48 60)" />
+        <ellipse cx="62" cy="54" rx="10" ry="5" transform="rotate(-6 62 54)" />
+        <ellipse cx="74" cy="62" rx="9" ry="5" transform="rotate(28 74 62)" />
+        <ellipse cx="66" cy="72" rx="8" ry="4.5" transform="rotate(-40 66 72)" />
+        <circle cx="56" cy="64" r="4" />
+        <ellipse cx="23" cy="104" rx="7" ry="3.5" transform="rotate(40 23 104)" />
+        <ellipse cx="88" cy="88" rx="7" ry="3.5" transform="rotate(-30 88 88)" />
+        <ellipse cx="31" cy="154" rx="7" ry="3.5" transform="rotate(-58 31 154)" />
+      </svg>
+    </div>
+
+    <div class="deco deco-postmark" aria-hidden="true">
+      <svg viewBox="0 0 140 140" fill="none" stroke="currentColor">
+        <circle cx="70" cy="70" r="57" stroke-width="2" stroke-dasharray="4 5" />
+        <circle cx="70" cy="70" r="45" stroke-width="1" />
+        <circle cx="70" cy="70" r="18" stroke-width="1" />
+        <text x="70" y="52" text-anchor="middle" font-size="9" letter-spacing="3">OUR LOVE</text>
+        <text x="70" y="94" text-anchor="middle" font-size="9" font-family="Courier New, monospace">2026</text>
+        <path d="M62 70 h16 M70 62 v16" stroke-width="1" />
+      </svg>
+    </div>
+
+    <div class="deco deco-stamp" aria-hidden="true">
+      <div class="stamp-inner">
+        <span class="stamp-flower">&#10048;</span>
+        <span class="stamp-year">2026</span>
       </div>
-    </nav>
-  </header>
+    </div>
+
+    <header class="site-header">
+      <p class="masthead">OUR LITTLE SCRAPBOOK &middot; LONDON / WUHAN</p>
+      <h1 class="site-title">
+        <span class="title-emoji">&#129418;</span>
+        <span>Max &amp; Moew moew</span>
+        <span class="title-emoji">&#128049;</span>
+      </h1>
+      <p class="site-sub">把我们的日子，一张一张贴起来</p>
+      <nav class="topbar">
+        <div class="topbar-inner">
+          <button class="main-tab active" data-view="gallery">图文记录</button>
+          <button class="main-tab" data-view="messages">留言板</button>
+        </div>
+      </nav>
+    </header>
 
   <main class="container">
     <section class="view" id="view-gallery">
+      <p class="hand-note">每一张照片，都是我们过过的一天</p>
       <div class="gallery-toolbar">
         <nav class="sub-nav" id="category-tabs">
           <button class="nav-tab active" data-category="all">全部</button>
           <button class="nav-tab" data-category="uk">英国</button>
           <button class="nav-tab" data-category="wuhan">武汉</button>
         </nav>
-        <button class="compose-btn" id="compose-open">+ 记录</button>
+        <div class="compose-wrap">
+          <svg class="hand-arrow" viewBox="0 0 90 50" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="M4 41 C 24 43, 52 35, 67 17" />
+            <path d="M57 17 L 68 15 L 63 26" />
+          </svg>
+          <button class="compose-btn" id="compose-open">+ 记录</button>
+        </div>
       </div>
       <section class="gallery" id="gallery">
       </section>
@@ -59,8 +129,10 @@
   </main>
 
   <footer class="footer">
-    <p>made for Max & Moew Moew</p>
+    <div class="footer-seal" aria-hidden="true">M&amp;M</div>
+    <p>made for Max &amp; Moew Moew</p>
   </footer>
+  </div>
 
   <div class="modal-overlay" id="modal">
     <div class="modal-content">
