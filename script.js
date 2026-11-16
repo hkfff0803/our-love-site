@@ -182,6 +182,7 @@ function openModal(key) {
     : "";
 
   document.getElementById("modal-tag").textContent = CATEGORY_MAP[post.category] || "";
+  document.getElementById("modal-date").textContent = post.date || "";
   document.getElementById("modal-title").textContent = post.title;
   document.getElementById("modal-text").textContent = post.fullText;
 

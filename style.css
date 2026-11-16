@@ -1007,6 +1007,15 @@ body {
   color: var(--accent);
 }
 
+.modal-date {
+  display: block;
+  margin: 8px 0 2px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+}
+
 .modal-title {
   margin: 14px 0 16px;
   font-family: var(--serif);
