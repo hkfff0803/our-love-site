@@ -525,8 +525,9 @@ body {
   padding-top: 8px;
   border-top: 1px dashed rgba(107, 90, 72, 0.3);
   font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.1em;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   color: var(--ink-faint);
 }
 
@@ -624,25 +625,7 @@ body {
 /* ============ 留言板：信纸 ============ */
 .message-section {
   position: relative;
-  background-color: var(--paper);
-  background-image: repeating-linear-gradient(
-    0deg,
-    rgba(160, 138, 110, 0.15) 0 1px,
-    transparent 1px 32px
-  );
-  border: 1px solid rgba(107, 90, 72, 0.16);
-  padding: 30px 30px 26px 42px;
-  box-shadow: 0 1px 2px rgba(58, 38, 18, 0.08), 0 10px 24px rgba(58, 38, 18, 0.08);
-}
-
-.message-section::before {
-  content: "";
-  position: absolute;
-  top: 18px;
-  bottom: 18px;
-  left: 22px;
-  width: 2px;
-  background: rgba(180, 91, 62, 0.45);
+  padding: 10px 0 6px;
 }
 
 .message-title {
@@ -1005,8 +988,9 @@ body {
   display: block;
   margin: 8px 0 2px;
   font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.14em;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   color: var(--ink-faint);
 }
 
@@ -1350,11 +1334,7 @@ body {
   }
 
   .message-section {
-    padding: 22px 16px 20px 26px;
-  }
-
-  .message-section::before {
-    left: 14px;
+    padding: 6px 0 2px;
   }
 
   .message-input-area {
