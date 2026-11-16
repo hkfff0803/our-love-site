@@ -1,10 +1,7 @@
 const CATEGORY_MAP = {
   uk: "英国",
   wuhan: "武汉",
-  daily: "日常",
-  travel: "旅行",
-  food: "美食",
-  campus: "校园"
+
 };
 
 let dbPosts = [];
@@ -248,13 +245,30 @@ function setupCarouselInteractions() {
   });
 
   track.addEventListener("touchstart", (e) => {
-    carousel.dragging = true;
+    carousel.dragging = false;
+    carousel.locked = null;
     carousel.startX = e.touches[0].clientX;
+    carousel.startY = e.touches[0].clientY;
+    carousel.currentX = carousel.startX;
     track.classList.remove("smooth");
   }, { passive: true });
 
   track.addEventListener("touchmove", (e) => {
-    if (!carousel.dragging) return;
+    const dx = e.touches[0].clientX - carousel.startX;
+    const dy = e.touches[0].clientY - carousel.startY;
+
+    if (!carousel.locked) {
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      if (Math.abs(dx) < Math.abs(dy)) {
+        carousel.locked = "y";
+        return;
+      }
+      carousel.locked = "x";
+      carousel.dragging = true;
+    }
+
+    if (carousel.locked !== "x") return;
+
     carousel.currentX = e.touches[0].clientX;
     const diff = carousel.currentX - carousel.startX;
     const w = carousel.containerWidth || track.parentElement.clientWidth;
@@ -262,8 +276,12 @@ function setupCarouselInteractions() {
   }, { passive: true });
 
   track.addEventListener("touchend", () => {
-    if (!carousel.dragging) return;
+    if (!carousel.dragging) {
+      carousel.locked = null;
+      return;
+    }
     carousel.dragging = false;
+    carousel.locked = null;
     const diff = carousel.currentX - carousel.startX;
     const threshold = 50;
     track.classList.add("smooth");

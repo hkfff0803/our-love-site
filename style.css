@@ -844,7 +844,7 @@ body {
 .modal-content {
   position: relative;
   width: min(1000px, 100%);
-  height: 84vh;
+  height: 70vh;
   display: grid;
   grid-template-columns: 1.08fr 0.92fr;
   overflow: hidden;
@@ -886,6 +886,7 @@ body {
 .modal-carousel {
   position: relative;
   height: 100%;
+  max-height: 70vh;
   overflow: hidden;
   background: #efe5d1;
 }
@@ -903,9 +904,11 @@ body {
 .modal-slide {
   flex: 0 0 100%;
   height: 100%;
-  display: grid;
-  place-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   padding: 22px;
+  overflow: hidden;
 }
 
 .modal-slide img {
@@ -914,7 +917,7 @@ body {
   width: auto;
   height: auto;
   object-fit: contain;
-  border: 10px solid #fffdf8;
+  outline: 10px solid #fffdf8;
   box-shadow: 0 2px 10px rgba(58, 38, 18, 0.2);
   user-select: none;
   -webkit-user-drag: none;
@@ -1319,7 +1322,7 @@ body {
   }
 
   .modal-slide img {
-    border-width: 6px;
+    outline-width: 6px;
   }
 
   .modal-body {
