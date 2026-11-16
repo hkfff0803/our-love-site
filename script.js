@@ -46,7 +46,6 @@ function getAllPosts() {
   return rows.map(toPost);
 }
 
-let currentCategory = "all";
 let carousel = {
   post: null,
   index: 0,
@@ -62,16 +61,13 @@ let carousel = {
 function renderPosts() {
   const gallery = document.getElementById("gallery");
   const allPosts = getAllPosts();
-  const filtered = currentCategory === "all"
-    ? allPosts
-    : allPosts.filter(p => p.category === currentCategory);
 
-  if (!filtered.length) {
+  if (!allPosts.length) {
     gallery.innerHTML = `<div class="empty-state">还没有记录，点「+ 记录」写下第一段吧</div>`;
     return;
   }
 
-  gallery.innerHTML = filtered.map(post => {
+  gallery.innerHTML = allPosts.map(post => {
     const firstImg = post.images[0];
     const multi = post.images.length > 1;
     const imageHtml = firstImg
@@ -91,7 +87,6 @@ function renderPosts() {
         ${multi ? `<span class="card-img-count">${post.images.length}图</span>` : ""}
       </div>
       <div class="card-body">
-        <span class="card-tag">${CATEGORY_MAP[post.category] || ""}</span>
         <h3 class="card-title">${escapeHtml(post.title)}</h3>
         <p class="card-excerpt">${escapeHtml(post.excerpt)}</p>
         <span class="card-date">${post.date}</span>
@@ -321,19 +316,6 @@ function setupMainNav() {
       tabs.forEach(t => t.classList.remove("active"));
       tab.classList.add("active");
       switchView(tab.dataset.view);
-    });
-  });
-}
-
-function setupNav() {
-  const tabs = document.querySelectorAll(".nav-tab");
-
-  tabs.forEach(tab => {
-    tab.addEventListener("click", () => {
-      tabs.forEach(t => t.classList.remove("active"));
-      tab.classList.add("active");
-      currentCategory = tab.dataset.category;
-      renderPosts();
     });
   });
 }
@@ -933,7 +915,6 @@ function setupAmbient() {
 document.addEventListener("DOMContentLoaded", () => {
   renderPosts();
   setupMainNav();
-  setupNav();
   setupModal();
   setupMessageInput();
   setupCompose();
