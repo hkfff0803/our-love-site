@@ -95,10 +95,6 @@ function renderPosts() {
         <h3 class="card-title">${escapeHtml(post.title)}</h3>
         <p class="card-excerpt">${escapeHtml(post.excerpt)}</p>
         <span class="card-date">${post.date}</span>
-        <div class="card-actions">
-          <button class="card-action" data-action="edit" data-key="${post.key}">编辑</button>
-          <button class="card-action" data-action="delete" data-key="${post.key}">删除</button>
-        </div>
       </div>
     </article>
   `;
@@ -120,19 +116,6 @@ function renderPosts() {
 
   gallery.querySelectorAll(".card").forEach(card => {
     card.addEventListener("click", () => openModal(card.dataset.key));
-  });
-
-  gallery.querySelectorAll(".card-action").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const id = Number(btn.dataset.key.replace("db-", ""));
-      if (btn.dataset.action === "edit") {
-        const row = dbPosts.find(p => p.id === id);
-        if (row && openEditPost) openEditPost(row);
-      } else if (btn.dataset.action === "delete") {
-        deletePost(id);
-      }
-    });
   });
 }
 
@@ -304,6 +287,22 @@ function setupModal() {
   document.getElementById("modal").addEventListener("click", (e) => {
     if (e.target.id === "modal") closeModal();
   });
+
+  document.getElementById("modal-edit").addEventListener("click", () => {
+    const post = carousel.post;
+    if (!post) return;
+    const row = dbPosts.find(p => p.id === post.id);
+    closeModal();
+    if (row && openEditPost) openEditPost(row);
+  });
+
+  document.getElementById("modal-delete").addEventListener("click", () => {
+    const post = carousel.post;
+    if (!post) return;
+    closeModal();
+    deletePost(post.id);
+  });
+
   setupCarouselInteractions();
 }
 

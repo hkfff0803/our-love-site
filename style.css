@@ -531,33 +531,6 @@ body {
   color: var(--ink-faint);
 }
 
-.card-actions {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  display: flex;
-  gap: 4px;
-  opacity: 1;
-  translate: 0 0;
-  z-index: 4;
-}
-
-.card-action {
-  border: 1px solid rgba(46, 37, 28, 0.15);
-  background: rgba(253, 250, 243, 0.94);
-  color: var(--ink-soft);
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  padding: 3px 7px;
-  cursor: pointer;
-}
-
-.card-action:hover {
-  color: var(--accent);
-  border-color: rgba(180, 91, 62, 0.5);
-}
-
 /* 照片角贴（每三张） */
 .card-corners {
   position: absolute;
@@ -1010,6 +983,37 @@ body {
   white-space: pre-wrap;
 }
 
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 30px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--rule);
+}
+
+.modal-action {
+  border: 1px solid rgba(107, 90, 72, 0.3);
+  background: rgba(255, 255, 255, 0.55);
+  padding: 6px 15px;
+  border-radius: 2px;
+  font-family: var(--serif);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.modal-action:hover {
+  color: var(--accent);
+  border-color: rgba(180, 91, 62, 0.5);
+}
+
+.modal-action-danger {
+  color: rgba(180, 91, 62, 0.85);
+  border-color: rgba(180, 91, 62, 0.35);
+}
+
 /* ============ 发帖弹层 ============ */
 .compose-content {
   display: block;
@@ -1328,11 +1332,6 @@ body {
     rotate: -0.6deg;
   }
 
-  .card-actions {
-    opacity: 1;
-    translate: 0 0;
-  }
-
   .message-section {
     padding: 6px 0 2px;
   }
@@ -1384,11 +1383,6 @@ body {
 }
 
 @media (hover: none) {
-  .card-actions {
-    opacity: 1;
-    translate: 0 0;
-  }
-
   .modal-arrow {
     opacity: 1;
   }
