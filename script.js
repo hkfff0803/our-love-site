@@ -576,18 +576,14 @@ async function compressImage(file, maxSide = 1600, quality = 0.8) {
   }
 }
 
-async function uploadImages(files) {
-  const urls = [];
-  for (const file of files) {
-    const upload = await compressImage(file);
-    const ext = upload.name.includes(".") ? upload.name.split(".").pop().toLowerCase() : "jpg";
-    const path = `${CLIENT_ID}/${crypto.randomUUID()}.${ext}`;
-    const { error } = await supabaseClient.storage.from("post-images").upload(path, upload);
-    if (error) throw error;
-    const { data } = supabaseClient.storage.from("post-images").getPublicUrl(path);
-    urls.push(data.publicUrl);
-  }
-  return urls;
+async function uploadImageFile(file) {
+  const upload = await compressImage(file);
+  const ext = upload.name.includes(".") ? upload.name.split(".").pop().toLowerCase() : "jpg";
+  const path = `${CLIENT_ID}/${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabaseClient.storage.from("post-images").upload(path, upload);
+  if (error) throw error;
+  const { data } = supabaseClient.storage.from("post-images").getPublicUrl(path);
+  return data.publicUrl;
 }
 
 function setupCompose() {
@@ -603,9 +599,30 @@ function setupCompose() {
   const categorySelect = document.getElementById("compose-category");
   const fileInput = document.getElementById("compose-images");
   const previews = document.getElementById("compose-previews");
+  const progressEl = document.getElementById("compose-progress");
   const submitBtn = document.getElementById("compose-submit");
-  let selectedFiles = [];
+  let imageItems = [];
   let editingId = null;
+  let drag = null;
+
+  function releasePreviewUrls() {
+    imageItems.forEach(item => {
+      if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+    });
+  }
+
+  function renderPreviews() {
+    previews.innerHTML = imageItems.map((item, i) => {
+      const src = item.kind === "url" ? item.url : item.previewUrl;
+      const safeSrc = escapeHtml(src).replace(/"/g, "&quot;");
+      return `
+      <div class="preview-item" data-index="${i}">
+        <img src="${safeSrc}" alt="" draggable="false">
+        ${item.kind === "file" ? `<span class="preview-new">新</span>` : ""}
+        <button class="preview-remove" type="button" data-index="${i}" title="移除这张">&times;</button>
+      </div>`;
+    }).join("");
+  }
 
   function reset() {
     editingId = null;
@@ -615,8 +632,10 @@ function setupCompose() {
     textInput.value = "";
     categorySelect.value = "uk";
     fileInput.value = "";
-    selectedFiles = [];
-    previews.innerHTML = "";
+    releasePreviewUrls();
+    imageItems = [];
+    renderPreviews();
+    progressEl.hidden = true;
     heading.textContent = "记录这一刻";
     imagesArea.hidden = false;
     submitBtn.textContent = "发布";
@@ -631,8 +650,12 @@ function setupCompose() {
   function open(post) {
     editingId = post ? post.id : null;
     heading.textContent = post ? "编辑记录" : "记录这一刻";
-    imagesArea.hidden = !!post;
     submitBtn.textContent = post ? "保存修改" : "发布";
+    releasePreviewUrls();
+    imageItems = post ? (post.images || []).map(url => ({ kind: "url", url })) : [];
+    renderPreviews();
+    progressEl.hidden = true;
+    imagesArea.hidden = false;
     if (post) {
       titleInput.value = post.title || "";
       excerptInput.value = post.excerpt || "";
@@ -644,6 +667,70 @@ function setupCompose() {
     document.body.style.overflow = "hidden";
   }
 
+  function finishDrag(pointerX, pointerY) {
+    const dragging = drag;
+    const el = dragging.el;
+    const nodes = Array.from(previews.children);
+    const beforeRects = new Map(nodes.map(node => [node, node.getBoundingClientRect()]));
+
+    const siblings = nodes.filter(node => node !== el);
+    let insertAt = 0;
+    let nearest = -1;
+    let min = Infinity;
+
+    siblings.forEach((node, i) => {
+      const rect = node.getBoundingClientRect();
+      const distance = Math.hypot(
+        pointerX - (rect.left + rect.width / 2),
+        pointerY - (rect.top + rect.height / 2)
+      );
+      if (distance < min) {
+        min = distance;
+        nearest = i;
+      }
+    });
+
+    if (nearest !== -1) {
+      const rect = siblings[nearest].getBoundingClientRect();
+      insertAt = pointerX > rect.left + rect.width / 2 ? nearest + 1 : nearest;
+    }
+
+    const fromIndex = imageItems.indexOf(dragging.item);
+    if (fromIndex !== -1) {
+      imageItems.splice(fromIndex, 1);
+      imageItems.splice(insertAt, 0, dragging.item);
+    }
+
+    el.classList.remove("is-dragging");
+    el.style.transform = "";
+    el.style.transition = "none";
+    previews.insertBefore(el, siblings[insertAt] || null);
+
+    Array.from(previews.children).forEach((node, i) => {
+      node.dataset.index = String(i);
+      const btn = node.querySelector(".preview-remove");
+      if (btn) btn.dataset.index = String(i);
+    });
+
+    Array.from(previews.children).forEach(node => {
+      if (node === el) return;
+      const before = beforeRects.get(node);
+      if (!before) return;
+      const after = node.getBoundingClientRect();
+      const dx = before.left - after.left;
+      const dy = before.top - after.top;
+      if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+      node.style.transition = "none";
+      node.style.transform = `translate(${dx}px, ${dy}px)`;
+      requestAnimationFrame(() => {
+        node.style.transition = "transform 200ms cubic-bezier(0.22, 0.68, 0.24, 1)";
+        node.style.transform = "";
+      });
+    });
+
+    drag = null;
+  }
+
   openEditPost = open;
 
   openBtn.addEventListener("click", () => open(null));
@@ -653,12 +740,88 @@ function setupCompose() {
     if (e.target === modal) close();
   });
 
-  fileInput.addEventListener("change", () => {
-    selectedFiles = Array.from(fileInput.files);
-    previews.innerHTML = selectedFiles
-      .map(file => `<img src="${URL.createObjectURL(file)}" alt="">`)
-      .join("");
+  previews.addEventListener("click", (e) => {
+    const btn = e.target.closest(".preview-remove");
+    if (!btn) return;
+    const idx = Number(btn.dataset.index);
+    const item = imageItems[idx];
+    if (!item) return;
+    if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+    imageItems.splice(idx, 1);
+    renderPreviews();
   });
+
+  previews.addEventListener("pointerdown", (e) => {
+    const itemEl = e.target.closest(".preview-item");
+    if (!itemEl || e.target.closest(".preview-remove")) return;
+    if (e.button !== undefined && e.button !== 0) return;
+    drag = {
+      el: itemEl,
+      item: imageItems[Number(itemEl.dataset.index)],
+      pointerId: e.pointerId,
+      startX: e.clientX,
+      startY: e.clientY,
+      active: false
+    };
+    itemEl.setPointerCapture(e.pointerId);
+  });
+
+  previews.addEventListener("pointermove", (e) => {
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    const dx = e.clientX - drag.startX;
+    const dy = e.clientY - drag.startY;
+
+    if (!drag.active) {
+      if (Math.hypot(dx, dy) < 6) return;
+      drag.active = true;
+      drag.el.classList.add("is-dragging");
+    }
+
+    drag.el.style.transform = `translate(${dx}px, ${dy}px)`;
+  });
+
+  previews.addEventListener("pointerup", (e) => {
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    if (!drag.active) {
+      drag = null;
+      return;
+    }
+    finishDrag(e.clientX, e.clientY);
+  });
+
+  previews.addEventListener("pointercancel", () => {
+    if (!drag) return;
+    drag.el.style.transform = "";
+    drag.el.classList.remove("is-dragging");
+    drag = null;
+  });
+
+  fileInput.addEventListener("change", () => {
+    const files = Array.from(fileInput.files || []);
+    files.forEach(file => {
+      imageItems.push({ kind: "file", file, previewUrl: URL.createObjectURL(file) });
+    });
+    fileInput.value = "";
+    renderPreviews();
+  });
+
+  async function collectImageUrls() {
+    const newCount = imageItems.filter(item => item.kind === "file").length;
+    let uploaded = 0;
+    const urls = [];
+    for (const item of imageItems) {
+      if (item.kind === "url") {
+        urls.push(item.url);
+        continue;
+      }
+      uploaded += 1;
+      progressEl.hidden = false;
+      progressEl.textContent = `上传中 第 ${uploaded}/${newCount} 张…`;
+      urls.push(await uploadImageFile(item.file));
+    }
+    progressEl.hidden = true;
+    return urls;
+  }
 
   submitBtn.addEventListener("click", async () => {
     const title = titleInput.value.trim();
@@ -679,6 +842,7 @@ function setupCompose() {
     submitBtn.disabled = true;
     submitBtn.textContent = editingId ? "保存中..." : "发布中...";
     try {
+      const images = await collectImageUrls();
       if (editingId) {
         const { data, error } = await supabaseClient
           .from("posts")
@@ -687,7 +851,8 @@ function setupCompose() {
             content,
             excerpt: excerpt || null,
             event_date: eventDate || null,
-            category
+            category,
+            images
           })
           .eq("id", editingId)
           .select("id, title, content, excerpt, event_date, category, images, client_id, created_at")
@@ -696,7 +861,6 @@ function setupCompose() {
         const idx = dbPosts.findIndex(p => p.id === data.id);
         if (idx !== -1) dbPosts[idx] = data;
       } else {
-        const images = await uploadImages(selectedFiles);
         const { data, error } = await supabaseClient
           .from("posts")
           .insert({
@@ -716,6 +880,7 @@ function setupCompose() {
       renderPosts();
       close();
     } catch (err) {
+      progressEl.hidden = true;
       console.error("保存失败:", err);
       alert("保存失败：" + (err.message || "请稍后再试"));
     } finally {
